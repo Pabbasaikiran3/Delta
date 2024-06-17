@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+    environment {
+        DOCKER_REGISTRY_URL = 'https://index.docker.io/v1/'
+        DOCKER_CREDENTIALS_ID = 'docker-credentials-id' // Replace with your Jenkins credentials ID
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', 
+                          branches: [[name: '*/main']], // Replace 'main' with your desired branch
+                          userRemoteConfigs: [[url: 'https://github.com/Pabbasaikiran3/Jenkins-Zero-To-Hero.git']]
+                         ])
+            }
+        }
+        stage('Docker Login') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin ${DOCKER_REGISTRY_URL}'
+                    }
+                }
+            }
+        }
+        stage('Verify Dockerfile') {
+            steps {
+                script {
+                    if (!fileExists('Dockerfile')) {
+                        error("Dockerfile not found in the repository root directory.")
+                    }
+                }
+            }
+        }
+        stage('Build and Push Image') {
+            steps {
+                script {
+                    def imageName = 'your-image-name:latest' // Replace with your desired image name
+                    sh "docker build -t ${imageName} ."
+                    sh "docker push ${imageName}"
+                }
+            }
+        }
+    }
+}
