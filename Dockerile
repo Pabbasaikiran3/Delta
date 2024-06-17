@@ -9,7 +9,7 @@ pipeline {
             steps {
                 checkout([$class: 'GitSCM', 
                           branches: [[name: '*/main']], // Replace 'main' with your desired branch
-                          userRemoteConfigs: [[url: 'https://github.com/Pabbasaikiran3/Jenkins-Zero-To-Hero.git']]
+                          userRemoteConfigs: [[url: 'https://github.com/Pabbasaikiran3/Delta']]
                          ])
             }
         }
